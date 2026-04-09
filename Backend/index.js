@@ -1,11 +1,51 @@
-const express = require('express')
-const app = express()
-const port = 3000
+const express = require('express');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const colors = require('colors'); // For styled console logs
+const connectDB = require('./config/db');
+const proposalRoutes = require('./routes/proposalRoutes');
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
+// Load environment variables from .env file
+dotenv.config();
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+// Connect to MongoDB
+connectDB();
+
+// Initialize Express app
+const app = express();
+
+// --- Middleware ---
+
+// 1. CORS (Cross-Origin Resource Sharing)
+// Your React frontend (e.g., on localhost:3000) will be on a different
+// "origin" than your backend (e.g., on localhost:5000). This middleware
+// allows the frontend to make API requests to the backend.
+app.use(cors());
+
+// 2. Body Parser
+// This allows the server to accept and parse JSON data in the body of requests.
+// Without this, `req.body` would be undefined.
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+
+// --- API Routes ---
+
+// Mount the proposal routes.
+// This tells Express that for any request starting with '/api/proposals',
+// it should use the 'proposalRoutes' router we defined earlier.
+app.use('/api/proposals', proposalRoutes);
+
+
+// --- Server Initialization ---
+
+// Define the port for the server to listen on.
+// It will try to use the port from your .env file, or default to 5000.
+const PORT = process.env.PORT || 5000;
+
+app.listen(
+    PORT,
+    console.log(
+        `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold
+    )
+);

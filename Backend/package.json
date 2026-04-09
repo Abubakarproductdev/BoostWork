@@ -1,11 +1,15 @@
 {
   "dependencies": {
+    "colors": "^1.4.0",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.1",
     "express": "^5.2.1",
     "mongo": "^0.1.0",
+    "mongodb": "^7.1.1",
     "mongoose": "^9.4.1",
     "moongoose": "^0.0.5",
-    "node": "^25.9.0"
+    "node": "^25.9.0",
+    "nodemon": "^3.1.14"
   },
   "name": "backend",
   "version": "1.0.0",
