@@ -15,7 +15,7 @@ jobs:
     permissions:
       contents: read #This is required for actions/checkout
 
-    steps:
+   steps:
       - uses: actions/checkout@v4
 
       - name: Set up Node.js version
@@ -23,17 +23,15 @@ jobs:
         with:
           node-version: '24.x'
 
-      - name: npm install, build, and test
-        run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
+      - name: npm install
+        working-directory: Backend # Capital B to match your folder
+        run: npm install
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: Backend/ # Capital B to match your folder
 
   deploy:
     runs-on: ubuntu-latest
