@@ -2,14 +2,35 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs').promises;
 const path = require('path');
 
-// Initialize the Google AI SDK with your API key
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 // Define your primary and fallback models
 const PRIMARY_MODEL = 'gemini-3-flash-preview';   // Fast, best for daily volume
 const FALLBACK_MODEL = 'gemini-1.5-flash-001';    // Reliable backup if rate limits hit
 
 const portfolioFilePath = path.join(__dirname, '..', 'data', 'portfolioContext.txt');
+
+const getGenAIClient = () => {
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
+
+    if (!apiKey) {
+        const error = new Error('GEMINI_API_KEY is missing in Backend/.env');
+        error.statusCode = 500;
+        throw error;
+    }
+
+    return new GoogleGenerativeAI(apiKey);
+};
+
+const isRetryableModelError = (error) => {
+    const message = `${error?.message || ''}`.toLowerCase();
+
+    return (
+        message.includes('429') ||
+        message.includes('rate limit') ||
+        message.includes('resource_exhausted') ||
+        message.includes('unavailable') ||
+        message.includes('timeout')
+    );
+};
 
 /**
  * Helper: Reads your portfolio file to act as the AI's "Brain"
@@ -65,6 +86,8 @@ exports.generateProposal = async (req, res) => {
     }
 
     try {
+        const genAI = getGenAIClient();
+
         // 1. Get Muhammad's entire history and rules (The Brain)
         const systemInstruction = await getSystemContext();
         
@@ -99,6 +122,10 @@ exports.generateProposal = async (req, res) => {
             responseText = result.response.text();
 
         } catch (primaryError) {
+            if (!isRetryableModelError(primaryError)) {
+                throw primaryError;
+            }
+
             console.warn(`Primary model failed (Rate limit or error). Falling back to ${FALLBACK_MODEL}...`);
             
             // 5. Fallback Mechanism (Gemini 1.5 Flash)
@@ -123,6 +150,9 @@ exports.generateProposal = async (req, res) => {
 
     } catch (error) {
         console.error('Total Generation Failure:', error);
-        res.status(500).json({ success: false, message: 'Failed to generate proposal.' });
+        res.status(error.statusCode || 500).json({
+            success: false,
+            message: error.message || 'Failed to generate proposal.'
+        });
     }
 };

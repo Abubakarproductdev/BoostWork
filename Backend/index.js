@@ -1,6 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
-dotenv.config();
+const path = require('path');
+dotenv.config({ path: path.join(__dirname, '.env'), quiet: true });
 
 const cors = require('cors');
 const colors = require('colors'); // For styled console logs

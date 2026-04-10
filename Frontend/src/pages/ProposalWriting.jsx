@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles } from 'lucide-react';
-import { useJobContext } from '../context/JobContext';
 import { cn } from '../lib/utils';
 
 export default function ProposalWriting() {
-  const { addJob } = useJobContext();
   const [messages, setMessages] = useState([
-    { id: 1, role: 'system', content: 'Hello! Paste a job title and description below, and I will generate a custom proposal for you. I will also save this job to your performance tracker automatically.' }
+    { 
+      id: 1, 
+      role: 'system', 
+      content: 'Hello! Paste a job title and description below, and I will generate a custom proposal for you based on your customized profile context. I will also save this job to your performance tracker automatically as a Draft.' 
+    }
   ]);
   const [inputTitle, setInputTitle] = useState('');
   const [inputDescription, setInputDescription] = useState('');
@@ -17,42 +19,85 @@ export default function ProposalWriting() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
     if (!inputTitle.trim() || !inputDescription.trim()) return;
-
-    // Add user message
-    const userMsg = { id: Date.now(), role: 'user', title: inputTitle, content: inputDescription };
-    setMessages(prev => [...prev, userMsg]);
-    setIsTyping(true);
 
     const capturedTitle = inputTitle;
     const capturedDesc = inputDescription;
 
+    // 1. Add user message to UI
+    const userMsg = { id: Date.now(), role: 'user', title: capturedTitle, content: capturedDesc };
+    setMessages(prev => [...prev, userMsg]);
+    setIsTyping(true);
+
     setInputTitle('');
     setInputDescription('');
 
-    // Simulate AI thinking and generating
-    setTimeout(() => {
-      const generatedProposal = `Hi there,\n\nI read your job post for "${capturedTitle}" and it immediately caught my attention. Based on your description, you are looking for an expert who can deliver quality results quickly.\n\nI have extensive experience dealing with similar requirements and can ensure that this project is executed flawlessly. Let's schedule a brief chat to discuss how I can bring value to your team.\n\nBest regards,\nShahid R.`;
-      
-      const aiMsg = { id: Date.now() + 1, role: 'system', content: generatedProposal };
-      setMessages(prev => [...prev, aiMsg]);
-      setIsTyping(false);
-
-      // Add to context as incomplete
-      addJob({
-        title: capturedTitle,
-        description: capturedDesc,
-        proposal: generatedProposal,
-        budget: 'TBD',
-        connectsCost: 0,
-        status: 'view',
-        completed: false, // user needs to add rest details later
-        appliedAt: new Date().toISOString()
+    try {
+      // ---------------------------------------------------------
+      // STEP 1: Call the Gemini AI Backend
+      // ---------------------------------------------------------
+      const aiResponse = await fetch('/api/ai/generate-proposal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobDescription: capturedDesc })
       });
 
-    }, 2000);
+      const aiData = await aiResponse.json();
+      
+      let finalProposalText = '';
+
+      if (aiData.success && aiData.data) {
+        // Stitch the AI JSON output into a single string
+        finalProposalText = `${aiData.data.hook}\n\n${aiData.data.body}\n\n${aiData.data.portfolio_proof}`;
+      } else {
+        throw new Error(aiData.message || 'Failed to generate AI response.');
+      }
+
+      // Add AI generated proposal to the Chat UI
+      const aiMsg = { id: Date.now() + 1, role: 'system', content: finalProposalText };
+      setMessages(prev => [...prev, aiMsg]);
+
+      // ---------------------------------------------------------
+      // STEP 2: Save to MongoDB as a 'Draft'
+      // ---------------------------------------------------------
+      // Map to the nested Mongoose schema we established earlier
+      const dbPayload = {
+        title: capturedTitle,
+        status: 'draft', // Saved as a draft/incomplete by default
+        jobDetails: {
+          description: capturedDesc,
+          connectsCost: 0,
+          jobPostedDate: new Date().toISOString(),
+        },
+        proposalText: finalProposalText,
+        submissionDate: new Date().toISOString()
+      };
+
+      const dbResponse = await fetch('/api/proposals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dbPayload)
+      });
+
+      const dbData = await dbResponse.json();
+
+      if (!dbData.success) {
+        console.error("Failed to save to database:", dbData.message);
+      }
+
+    } catch (error) {
+      console.error('Error generating proposal:', error);
+      const errorMsg = { 
+        id: Date.now() + 2, 
+        role: 'system', 
+        content: `❌ Error: ${error.message}. Please check your API key and backend connection.` 
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (
