@@ -4,14 +4,13 @@ const path = require('path');
 dotenv.config({ path: path.join(__dirname, '.env'), quiet: true });
 
 const cors = require('cors');
-const colors = require('colors'); // For styled console logs
+const colors = require('colors'); 
 const { createRateLimiter } = require('./middleware/security');
 const proposalRoutes = require('./routes/proposalRoutes');
 const connectDB = require('./Config/dbConfig');
-const portfolioRoutes = require('./routes/portfolioRoutes'); // <-- ADD THIS LINE
-const aiRoutes = require('./routes/aiRoutes'); // <-- ADD THIS LINE
+const portfolioRoutes = require('./routes/portfolioRoutes'); 
+const aiRoutes = require('./routes/aiRoutes'); 
 
-// Load environment variables from .env file
 
 // Connect to MongoDB
 connectDB();
