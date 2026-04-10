@@ -1,37 +1,59 @@
 {
-  "professionalSummary": "I am a highly skilled MERN stack developer with over 5 years of experience building scalable web applications. My expertise lies in creating efficient backends with Node.js and Express, and dynamic frontends with React.",
-  "skills": [
-    "React",
-    "Node.js",
-    "Express",
-    "MongoDB",
-    "JavaScript (ES6+)",
-    "REST APIs",
-    "GraphQL",
-    "TypeScript"
-  ],
+  "profile": {
+    "fullName": "Muhammad Abubakar",
+    "title": "front end dev",
+    "bio": "nothing"
+  },
   "projects": [
     {
       "title": "E-commerce Platform",
       "description": "Built a full-featured e-commerce site with product management, user authentication (JWT), and a Stripe-integrated checkout process.",
+      "link": "http://example.com/ecommerce",
       "technologies": [
         "React",
         "Redux",
         "Node.js",
         "Stripe API"
-      ],
-      "link": "http://example.com/ecommerce"
+      ]
     },
     {
       "title": "Real-time Analytics Dashboard",
       "description": "Developed a dashboard using WebSockets to display live data visualizations for user activity.",
+      "link": "http://example.com/dashboard",
       "technologies": [
         "React",
         "D3.js",
         "Express",
         "Socket.IO"
-      ],
-      "link": "http://example.com/dashboard"
+      ]
+    },
+    {
+      "title": "hello",
+      "description": "agda",
+      "link": "agag",
+      "technologies": [
+        "agagaged"
+      ]
+    },
+    {
+      "title": "adgag",
+      "description": "adg",
+      "link": "adg",
+      "technologies": [
+        "adg"
+      ]
+    }
+  ],
+  "links": [
+    {
+      "id": 1775844192389,
+      "name": "github",
+      "url": "https://github.com/Abubakarproductdev"
+    },
+    {
+      "id": 1775844209704,
+      "name": "youtube",
+      "url": "https://github.com/Abubakarproductdev"
     }
   ]
 }

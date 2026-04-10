@@ -1,34 +1,113 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserCircle, Save, Plus, Trash2, Link as LinkIcon, FolderKanban } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export default function CustomizeDetails() {
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Profile matches the backend exactly
   const [profile, setProfile] = useState({
-    fullName: 'Shahid R.',
-    title: 'Senior Full Stack Developer & UI/UX Expert',
-    bio: 'I am a specialized frontend and full-stack developer with 5+ years of experience building modern web apps. I excel in React, Node, Tailwind, and creating dynamic, responsive UIs that convert.',
+    fullName: '',
+    title: '',
+    bio: '',
   });
 
-  const [projects, setProjects] = useState([
-    { id: 1, name: 'SaaS Analytics Dashboard', description: 'Built a high-performance analytics dashboard using React, Recharts, and Express.', tech: 'React, Node, Tailwind' },
-    { id: 2, name: 'E-commerce Platform', description: 'Scaled a Shopify-like platform to handle 10k+ daily users.', tech: 'Next.js, MongoDB' }
-  ]);
+  const [projects, setProjects] = useState([]);
+  const [links, setLinks] = useState([]);
 
-  const [links, setLinks] = useState([
-    { id: 1, name: 'Portfolio', url: 'https://myportfolio.com' },
-    { id: 2, name: 'GitHub', url: 'https://github.com/ShahidR' }
-  ]);
+  // --- GET DATA FROM BACKEND ---
+  useEffect(() => {
+    const fetchPortfolioData = async () => {
+      try {
+        const response = await fetch('/api/portfolio');
+        const data = await response.json();
+        
+        if (data.success && Object.keys(data.data).length > 0) {
+          
+          if (data.data.profile) setProfile(data.data.profile);
+          
+          if (data.data.links) setLinks(data.data.links);
+
+          // MAP PROJECTS: Convert JSON structure to Frontend state
+          if (data.data.projects) {
+            const mappedProjects = data.data.projects.map((p, index) => ({
+              id: p.id || Date.now() + index, // Give it an ID for React rendering
+              title: p.title || p.name || '', // Handle legacy 'name' just in case
+              description: p.description || '',
+              link: p.link || '',
+              // Convert the backend Array ["React", "Node"] to a String "React, Node"
+              tech: Array.isArray(p.technologies) 
+                ? p.technologies.join(', ') 
+                : (p.tech || '') 
+            }));
+            setProjects(mappedProjects);
+          }
+
+        } else {
+          // Empty state defaults
+          setProjects([{ id: Date.now(), title: '', description: '', tech: '', link: '' }]);
+          setLinks([{ id: Date.now(), name: '', url: '' }]);
+        }
+      } catch (error) {
+        console.error('Error fetching portfolio data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPortfolioData();
+  }, []);
+
+  // --- POST DATA TO BACKEND ---
+  const handleSave = async () => {
+    setIsSaving(true);
+    
+    // MAP PROJECTS: Convert Frontend state back to exact JSON Schema
+    const formattedProjects = projects.map(p => ({
+      title: p.title,
+      description: p.description,
+      link: p.link,
+      // Convert "React, Node" string back into an Array ["React", "Node"]
+      technologies: p.tech.split(',').map(item => item.trim()).filter(Boolean)
+    }));
+
+    const payload = {
+      profile,
+      projects: formattedProjects,
+      links
+    };
+
+    try {
+      const response = await fetch('/api/portfolio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        alert('Failed to save portfolio data: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Error saving portfolio data:', error);
+      alert('Network error while saving data.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const inputClass = "w-full bg-[#0f172a] text-white border border-[#334155] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder:text-slate-500";
   const labelClass = "block text-sm font-medium text-slate-400 mb-1.5";
 
-  const handleSave = () => {
-    setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-    }, 1000);
-  };
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-slate-400 animate-pulse">Loading portfolio context...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-12 h-full overflow-y-auto pr-2 custom-scrollbar">
@@ -42,7 +121,8 @@ export default function CustomizeDetails() {
         </div>
         <button 
           onClick={handleSave}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] active:scale-95 flex items-center gap-2"
+          disabled={isSaving}
+          className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] active:scale-95 flex items-center gap-2 disabled:opacity-75"
         >
           {isSaving ? <span className="animate-pulse">Saving...</span> : <><Save className="w-4 h-4" /> Save Profile</>}
         </button>
@@ -97,7 +177,7 @@ export default function CustomizeDetails() {
                  Projects Context
                </h2>
                <button 
-                  onClick={() => setProjects([...projects, { id: Date.now(), name: '', description: '', tech: '' }])}
+                  onClick={() => setProjects([...projects, { id: Date.now(), title: '', description: '', tech: '', link: '' }])}
                   className="text-sm font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1 bg-indigo-500/10 px-3 py-1.5 rounded-lg"
                >
                  <Plus className="w-4 h-4" /> Add Project
@@ -109,27 +189,41 @@ export default function CustomizeDetails() {
                   <div key={proj.id} className="bg-[#0f172a] border border-[#334155] rounded-xl p-4 relative group">
                     <button 
                       onClick={() => setProjects(projects.filter(p => p.id !== proj.id))}
-                      className="absolute top-4 right-4 text-slate-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                      className="absolute top-4 right-4 text-slate-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 z-10"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      
+                      {/* Changed to proj.title */}
                       <div>
-                         <label className={cn(labelClass, "text-xs")}>Project Name</label>
-                         <input type="text" value={proj.name} onChange={e => {
+                         <label className={cn(labelClass, "text-xs")}>Project Title</label>
+                         <input type="text" value={proj.title} onChange={e => {
                            const newProj = [...projects];
-                           newProj[idx].name = e.target.value;
+                           newProj[idx].title = e.target.value;
                            setProjects(newProj);
                          }} className={cn(inputClass, "py-1.5 text-sm")} />
                       </div>
+
+                      {/* Added Link field based on your JSON */}
                       <div>
-                         <label className={cn(labelClass, "text-xs")}>Technologies Used</label>
+                         <label className={cn(labelClass, "text-xs")}>Live Link / GitHub</label>
+                         <input type="text" value={proj.link} onChange={e => {
+                           const newProj = [...projects];
+                           newProj[idx].link = e.target.value;
+                           setProjects(newProj);
+                         }} className={cn(inputClass, "py-1.5 text-sm")} placeholder="https://" />
+                      </div>
+
+                      <div className="md:col-span-2">
+                         <label className={cn(labelClass, "text-xs")}>Technologies Used (comma separated)</label>
                          <input type="text" value={proj.tech} onChange={e => {
                            const newProj = [...projects];
                            newProj[idx].tech = e.target.value;
                            setProjects(newProj);
-                         }} className={cn(inputClass, "py-1.5 text-sm")} />
+                         }} className={cn(inputClass, "py-1.5 text-sm")} placeholder="React, Node.js, Stripe API" />
                       </div>
+
                       <div className="md:col-span-2">
                          <label className={cn(labelClass, "text-xs")}>Description / Impact</label>
                          <textarea rows={2} value={proj.description} onChange={e => {
