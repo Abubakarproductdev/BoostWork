@@ -42,27 +42,17 @@ app.use(cors({
     },
 }));
 
-// 2. Body Parser
-// This allows the server to accept and parse JSON data in the body of requests.
-// Without this, `req.body` would be undefined.
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 
 
 // --- API Routes ---
 
-// Mount the proposal routes.
-// This tells Express that for any request starting with '/api/proposals',
-// it should use the 'proposalRoutes' router we defined earlier.
 app.use('/api/proposals', proposalRoutes);
-app.use('/api/portfolio', portfolioRoutes); // <-- ADD THIS LINE
-app.use('/api/ai', aiLimiter, aiRoutes); // <-- ADD THIS LINE
+app.use('/api/portfolio', portfolioRoutes); 
+app.use('/api/ai', aiLimiter, aiRoutes); 
 
 
-// --- Server Initialization ---
-
-// Define the port for the server to listen on.
-// It will try to use the port from your .env file, or default to 5000.
 const PORT = process.env.PORT || 5000;
 
 app.listen(
