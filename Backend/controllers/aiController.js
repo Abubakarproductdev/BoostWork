@@ -2,78 +2,60 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs').promises;
 const path = require('path');
 
-// --- Configuration ---
+// Initialize the Google AI SDK with your API key
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-001' });
+
+// Define your primary and fallback models
+const PRIMARY_MODEL = 'gemini-3-flash-preview';   // Fast, best for daily volume
+const FALLBACK_MODEL = 'gemini-1.5-flash-001';    // Reliable backup if rate limits hit
 
 const portfolioFilePath = path.join(__dirname, '..', 'data', 'portfolioContext.txt');
 
-// This will act as our simple in-memory cache holder for the backend session.
-// For a single-user app, this is highly efficient.
-let activeCache = {
-    name: null,
-    expires: 0, // Expiration time in milliseconds
-};
-
 /**
- * Helper function to manage the Gemini Cache.
- * It checks if a valid cache exists and creates a new one if not.
+ * Helper: Reads your portfolio file to act as the AI's "Brain"
  */
-const manageGeminiCache = async () => {
-    const now = Date.now();
-
-    // 1. Check if the current cache is still valid
-    if (activeCache.name && now < activeCache.expires) {
-        console.log('Using existing, valid Gemini cache.');
-        return activeCache.name;
-    }
-
-    console.log('Cache expired or not found. Creating a new one...');
-
-    // 2. Read your portfolio data (the "Static" Block)
-    let systemContext;
+const getSystemContext = async () => {
     try {
         const fileContent = await fs.readFile(portfolioFilePath, 'utf8');
-        // Your file is JSON, but the system instruction is a string.
-        // We'll format it nicely for the AI.
-        const portfolioJson = JSON.parse(fileContent);
-        systemContext = `
-            You are an expert proposal writer for a MERN stack developer named Muhammad. 
-            Your response must be based on the following context about Muhammad's skills and projects.
-            --- START CONTEXT ---
-            ${JSON.stringify(portfolioJson, null, 2)}
-            --- END CONTEXT ---
-            When given a job description, write a concise, human-like proposal that directly addresses the client's problem.
+        return `
+            You are the expert proposal writer for Muhammad, a highly skilled freelancer.
+            Your ONLY goal is to write Upwork proposals that get clients to reply.
+            
+            --- MUHAMMAD'S KNOWLEDGE BASE ---
+            ${fileContent}
+            --- END KNOWLEDGE BASE ---
+            
+            RULES FOR WRITING:
+            1. NO greetings like "Hi", "Hello", or "Dear Hiring Manager". 
+            2. The very first sentence MUST be a 'Hook' that directly addresses the client's biggest technical or business problem.
+            3. Briefly explain the exact procedure to solve their problem.
+            4. Include ONLY ONE relevant project from the Knowledge Base (e.g., SIVO for AI/React, AgriMind for multi-agent, or the 3D Miswak/Marker models for CAD) in exactly 2 lines to prove competence.
+            5. Never hallucinate skills outside the Knowledge Base.
         `;
     } catch (error) {
-        if (error.code === 'ENOENT') {
-            throw new Error("Portfolio context file not found. Please create it first.");
-        }
-        throw error;
+        throw new Error("Could not read portfolio file. Ensure portfolioContext.txt exists.");
     }
-
-    // 3. Create the cache on Google's servers (The "Server" Block)
-    const ttlSeconds = 7200; // 2 hours, as per your plan
-    const newCachedContent = await model.createCachedContent({
-        model: 'models/gemini-1.5-flash-001',
-        displayName: `muhammad_portfolio_cache_${now}`, // Unique name for each cache instance
-        systemInstruction: systemContext,
-        ttl: { seconds: ttlSeconds },
-    });
-    
-    // 4. Store the new cache details in our backend's memory
-    activeCache.name = newCachedContent.name;
-    activeCache.expires = now + ttlSeconds * 1000;
-
-    console.log(`New Gemini cache created. Name: ${activeCache.name}`);
-    return activeCache.name;
 };
 
+/**
+ * Helper: Analyzes the job description to determine the client's persona
+ */
+const analyzePersona = (jobDescription) => {
+    const text = jobDescription.toLowerCase();
+    
+    // Scan for technical jargon
+    const isTechnical = text.includes('api') || text.includes('react') || text.includes('architecture') || text.includes('solidworks') || text.includes('pine script');
+    
+    if (isTechnical) {
+        return "PERSONA INSTRUCTION: The client is highly technical. Use strict engineering terms, mention specific frameworks, and keep the tone analytical and precise.";
+    } else {
+        return "PERSONA INSTRUCTION: The client is a business owner or non-technical manager. Focus heavily on ROI, delivery speed, smooth communication, and end-user experience. Avoid deep code jargon.";
+    }
+};
 
 /**
- * @desc    Generate a proposal using the cached context.
+ * @desc    Generate a proposal with Model Fallback
  * @route   POST /api/ai/generate-proposal
- * @access  Private
  */
 exports.generateProposal = async (req, res) => {
     const { jobDescription } = req.body;
@@ -83,45 +65,64 @@ exports.generateProposal = async (req, res) => {
     }
 
     try {
-        // 1. Ensure we have a valid cache (The "Fast Bidding" Logic)
-        const cacheName = await manageGeminiCache();
+        // 1. Get Muhammad's entire history and rules (The Brain)
+        const systemInstruction = await getSystemContext();
         
-        // 2. Call the model, referencing the cache via the 'tools' parameter.
-        // The API automatically attaches the job description to your "cached brain".
-        const result = await model.generateContent({
-            contents: [{ role: 'user', parts: [{ text: jobDescription }] }],
-            tools: [{ cachedContent: { name: cacheName } }]
-        });
-        
-        const responseText = result.response.text();
+        // 2. Figure out who we are talking to
+        const persona = analyzePersona(jobDescription);
 
-        // 3. Send the AI-generated proposal back to the frontend.
+        // 3. Assemble the final prompt
+        const finalPrompt = `
+            ${persona}
+            
+            Write a proposal for this exact job description:
+            "${jobDescription}"
+            
+            Format the output strictly as JSON:
+            {
+                "hook": "The opening 1-2 sentences",
+                "body": "The procedure and explanation",
+                "portfolio_proof": "The 2-line reference to a past project"
+            }
+        `;
+
+        // 4. Try Primary Model (Gemini 3 Flash)
+        let responseText;
+        try {
+            console.log(`Attempting generation with ${PRIMARY_MODEL}...`);
+            const model = genAI.getGenerativeModel({ 
+                model: PRIMARY_MODEL,
+                systemInstruction: systemInstruction,
+                generationConfig: { responseMimeType: "application/json" } // Forces JSON output
+            });
+            const result = await model.generateContent(finalPrompt);
+            responseText = result.response.text();
+
+        } catch (primaryError) {
+            console.warn(`Primary model failed (Rate limit or error). Falling back to ${FALLBACK_MODEL}...`);
+            
+            // 5. Fallback Mechanism (Gemini 1.5 Flash)
+            const fallbackModel = genAI.getGenerativeModel({ 
+                model: FALLBACK_MODEL,
+                systemInstruction: systemInstruction,
+                generationConfig: { responseMimeType: "application/json" }
+            });
+            const result = await fallbackModel.generateContent(finalPrompt);
+            responseText = result.response.text();
+        }
+
+        // Parse the guaranteed JSON string into a real object
+        const proposalData = JSON.parse(responseText);
+
+        // 6. Send it to the frontend dashboard
         res.status(200).json({
             success: true,
-            proposal: responseText,
+            modelUsed: responseText.includes(PRIMARY_MODEL) ? PRIMARY_MODEL : FALLBACK_MODEL, // Optional tracking
+            data: proposalData
         });
 
     } catch (error) {
-        console.error('Error generating proposal with Gemini:', error);
+        console.error('Total Generation Failure:', error);
         res.status(500).json({ success: false, message: 'Failed to generate proposal.' });
-    }
-};
-
-/**
- * @desc    Manually force the cache to be refreshed.
- * @route   POST /api/ai/refresh-cache
- * @access  Private
- */
-exports.refreshCache = async (req, res) => {
-    // Invalidate the current cache so the next call to manageGeminiCache will create a new one.
-    activeCache.name = null;
-    activeCache.expires = 0;
-    
-    try {
-        await manageGeminiCache(); // Re-run the cache creation logic
-        res.status(200).json({ success: true, message: "Gemini cache has been refreshed." });
-    } catch (error) {
-        console.error('Error manually refreshing cache:', error);
-        res.status(500).json({ success: false, message: 'Failed to refresh cache.' });
     }
 };
