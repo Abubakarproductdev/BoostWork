@@ -18,7 +18,7 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: '22.x'
 
       # THIS STEP IS REMOVED. Do NOT run npm install here.
       # Azure will run it for us on the server.
