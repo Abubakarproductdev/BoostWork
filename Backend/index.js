@@ -15,7 +15,6 @@ const aiRoutes = require('./routes/aiRoutes');
 // Connect to MongoDB
 connectDB();
 
-// Initialize Express app
 const app = express();
 const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173')
     .split(',')
