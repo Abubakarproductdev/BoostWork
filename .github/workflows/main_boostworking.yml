@@ -19,7 +19,7 @@ jobs:
 
       - name: Create deployment package
         run: |
-          cd backend
+          cd Backend
           zip -r ../deploy.zip . -x "node_modules/*" ".env" ".git/*"
 
       - name: Login to Azure
