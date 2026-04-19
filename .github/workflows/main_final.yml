@@ -1,0 +1,70 @@
+name: Build and deploy Node.js app to Azure Web App - Final
+
+on:
+  push:
+    branches:
+      - backend
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      # Checkout repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Setup Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+
+      # Install dependencies, build, test INSIDE Backend folder
+      - name: Install, build, test (Backend)
+        working-directory: Backend
+        run: |
+          npm install
+          npm run build --if-present
+          npm run test --if-present
+
+      # Upload only Backend folder
+      - name: Upload artifact for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-app
+          path: Backend
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      # Download artifact
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node-app
+          path: Backend
+
+      # Login to Azure using OIDC
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E9142E27F7574C43A619329708C0A2BF }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6AC6D5E06D214CF684A65B4AB7579E1E }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AC479B5331E54597B1E1FE62C49BC503 }}
+
+      # Deploy ONLY Backend folder
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'Final'
+          slot-name: 'Production'
+          package: Backend
