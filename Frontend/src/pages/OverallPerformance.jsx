@@ -17,8 +17,13 @@ export default function OverallPerformance() {
     
     // Filter jobs by time frame
     const filteredJobs = jobs.filter(job => {
-      const diff = differenceInDays(now, parseISO(job.appliedAt));
-      return diff <= timeframe;
+      if (!job.appliedAt) return false;
+      try {
+        const diff = differenceInDays(now, parseISO(job.appliedAt));
+        return diff <= timeframe;
+      } catch (e) {
+        return false;
+      }
     });
 
     const applied = filteredJobs.length;
@@ -37,8 +42,9 @@ export default function OverallPerformance() {
         viewed++;
         responses++;
         won++;
-        // Rough mock calculation from string budget
-        earned += job.budget.includes('$') ? parseInt(job.budget.replace(/[^0-9]/g, '')) || 500 : 500;
+        // Rough mock calculation safely from budget or budgetDisplay
+        const budgetStr = typeof job.budget === 'string' ? job.budget : (job.budgetDisplay || '');
+        earned += budgetStr.includes('$') || /\d/.test(budgetStr) ? parseInt(budgetStr.replace(/[^0-9]/g, '')) || 500 : 500;
       }
     });
 
