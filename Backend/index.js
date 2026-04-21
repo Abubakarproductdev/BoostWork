@@ -6,7 +6,7 @@ dotenv.config({ path: path.join(__dirname, '.env'), quiet: true });
 const cors = require('cors');
 const colors = require('colors'); 
 const { createRateLimiter } = require('./middleware/security');
-const proposalRoutes = require('./routes/proposalRoutes');
+const proposalRoutes = require('./routes/ProposalRoutes');
 const connectDB = require('./Config/dbConfig');
 const portfolioRoutes = require('./routes/portfolioRoutes'); 
 const aiRoutes = require('./routes/aiRoutes'); 
@@ -16,7 +16,7 @@ const aiRoutes = require('./routes/aiRoutes');
 connectDB();
 
 const app = express();
-const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173')
+const allowedOrigins = (process.env.CORS_ORIGIN || 'https://boost-working.vercel.app/')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
@@ -45,6 +45,13 @@ app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 
 
 // --- API Routes ---
+
+app.get('/health', (_req, res) => {
+    res.status(200).json({
+        success: true,
+        status: 'ok',
+    });
+});
 
 app.use('/api/proposals', proposalRoutes);
 app.use('/api/portfolio', portfolioRoutes); 

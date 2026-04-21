@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserCircle, Save, Plus, Trash2, Link as LinkIcon, FolderKanban } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn, API_BASE } from '../lib/utils';
 
 export default function CustomizeDetails() {
   const [isSaving, setIsSaving] = useState(false);
@@ -20,7 +20,7 @@ export default function CustomizeDetails() {
   useEffect(() => {
     const fetchPortfolioData = async () => {
       try {
-        const response = await fetch('/api/portfolio');
+        const response = await fetch(`${API_BASE}/api/portfolio`);
         const data = await response.json();
         
         if (data.success && Object.keys(data.data).length > 0) {
@@ -79,7 +79,7 @@ export default function CustomizeDetails() {
     };
 
     try {
-      const response = await fetch('/api/portfolio', {
+      const response = await fetch(`${API_BASE}/api/portfolio`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

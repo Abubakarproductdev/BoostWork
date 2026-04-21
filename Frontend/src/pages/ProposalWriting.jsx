@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn, API_BASE } from '../lib/utils';
+import { useJobContext } from '../context/JobContext';
 
 export default function ProposalWriting() {
+  const { addJob } = useJobContext();
   const [messages, setMessages] = useState([
     { 
       id: 1, 
@@ -38,11 +40,15 @@ export default function ProposalWriting() {
       // ---------------------------------------------------------
       // STEP 1: Call the Gemini AI Backend
       // ---------------------------------------------------------
-      const aiResponse = await fetch('/api/ai/generate-proposal', {
+      const aiResponse = await fetch(`${API_BASE}/api/ai/generate-proposal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jobDescription: capturedDesc })
       });
+
+      if (aiResponse.status === 429) {
+        throw new Error('Too many requests. Please wait a minute and try again.');
+      }
 
       const aiData = await aiResponse.json();
       
@@ -75,7 +81,7 @@ export default function ProposalWriting() {
         submissionDate: new Date().toISOString()
       };
 
-      const dbResponse = await fetch('/api/proposals', {
+      const dbResponse = await fetch(`${API_BASE}/api/proposals`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dbPayload)
@@ -83,7 +89,9 @@ export default function ProposalWriting() {
 
       const dbData = await dbResponse.json();
 
-      if (!dbData.success) {
+      if (dbData.success) {
+        addJob(dbData.data);
+      } else {
         console.error("Failed to save to database:", dbData.message);
       }
 

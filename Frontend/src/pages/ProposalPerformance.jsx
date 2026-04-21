@@ -1,38 +1,9 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { cn } from '../lib/utils';
+import React, { useState } from 'react';
+import { cn, API_BASE } from '../lib/utils';
 import { CheckCircle2, Circle, Clock, Zap, Pencil, X } from 'lucide-react';
 import AddJobModal from '../components/shared/AddJobModal';
 import JobDetailModal from '../components/shared/JobDetailModal';
-
-const PROPOSALS_CACHE_KEY = 'proposal-performance-cache-v1';
-const PROPOSALS_CACHE_TTL_MS = 5 * 60 * 1000;
-
-const loadCachedProposals = () => {
-  try {
-    const raw = localStorage.getItem(PROPOSALS_CACHE_KEY);
-    if (!raw) return null;
-
-    const parsed = JSON.parse(raw);
-    if (!parsed?.timestamp || !Array.isArray(parsed?.data)) return null;
-
-    if ((Date.now() - parsed.timestamp) > PROPOSALS_CACHE_TTL_MS) {
-      localStorage.removeItem(PROPOSALS_CACHE_KEY);
-      return null;
-    }
-
-    return parsed.data;
-  } catch {
-    localStorage.removeItem(PROPOSALS_CACHE_KEY);
-    return null;
-  }
-};
-
-const saveCachedProposals = (jobs) => {
-  localStorage.setItem(PROPOSALS_CACHE_KEY, JSON.stringify({
-    timestamp: Date.now(),
-    data: jobs,
-  }));
-};
+import { useJobContext } from '../context/JobContext';
 
 // --- EMBEDDED EDIT MODAL ---
 const buildEditFormData = (job) => ({
@@ -218,63 +189,16 @@ const EditJobModal = ({ isOpen, onClose, job, onSave }) => {
 
 // --- MAIN PAGE COMPONENT ---
 export default function ProposalPerformance() {
-  const [jobs, setJobs] = useState(() => loadCachedProposals() || []);
-  const [isLoading, setIsLoading] = useState(() => !loadCachedProposals());
+  const { jobs, isLoading, addJob, updateJob } = useJobContext();
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
   const [editingJob, setEditingJob] = useState(null);
 
-  const normalizeProposal = (job) => ({
-    ...job,
-    connectsCost: job.jobDetails?.connectsCost ?? 0,
-    description: job.jobDetails?.description || '',
-    clientRegion: job.clientInfo?.region || '',
-    clientRate: job.clientInfo?.hireRate || '',
-    amountSpent: job.clientInfo?.totalSpent || '',
-    clientAge: job.clientInfo?.memberSince || '',
-    isClientVerified: job.clientInfo?.isPaymentVerified || false,
-    proposal: job.proposalText || '',
-    appliedAt: job.submissionDate,
-    budgetDisplay: job.budget?.amount
-      ? `${job.budget.amount}${job.budget?.type === 'hourly' ? '/hr' : ''}`
-      : 'N/A',
-  });
-
-  // GET: Fetch all jobs
-  const fetchProposals = useCallback(async () => {
-    try {
-      const cached = loadCachedProposals();
-      if (cached) {
-        setJobs(cached);
-        setIsLoading(false);
-        return;
-      }
-
-      const response = await fetch('/api/proposals');
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Failed to fetch proposals.');
-      }
-      const normalizedJobs = data.data.map(normalizeProposal);
-      setJobs(normalizedJobs);
-      saveCachedProposals(normalizedJobs);
-    } catch (error) {
-      console.error('Error fetching proposals:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchProposals();
-  }, [fetchProposals]);
-
   // PUT: Update job
   const handleUpdateJob = async (id, updatedData) => {
     try {
-      const response = await fetch(`/api/proposals/${id}`, {
+      const response = await fetch(`${API_BASE}/api/proposals/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData),
@@ -282,9 +206,7 @@ export default function ProposalPerformance() {
       const data = await response.json();
       
       if (response.ok && data.success) {
-        const nextJobs = jobs.map(job => (job._id === id ? normalizeProposal(data.data) : job));
-        setJobs(nextJobs);
-        saveCachedProposals(nextJobs);
+        updateJob(id, data.data);
         setEditingJob(null);
       } else {
         alert('Failed to update job: ' + (data.message || 'Unknown error'));
@@ -423,11 +345,7 @@ export default function ProposalPerformance() {
 
       <AddJobModal 
         isOpen={isAddModalOpen} 
-        onCreated={(newJob) => {
-          const nextJobs = [normalizeProposal(newJob), ...jobs];
-          setJobs(nextJobs);
-          saveCachedProposals(nextJobs);
-        }}
+        onCreated={addJob}
         onClose={() => {
           setIsAddModalOpen(false);
         }} 

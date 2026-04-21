@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, MessageSquarePlus } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn, API_BASE } from '../lib/utils';
 
 export default function ClientLeadGeneration() {
   const [messages, setMessages] = useState([
@@ -14,7 +14,7 @@ export default function ClientLeadGeneration() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
     if (!inputContext.trim()) return;
 
@@ -26,14 +26,36 @@ export default function ClientLeadGeneration() {
     const capturedContext = inputContext;
     setInputContext('');
 
-    // Simulate AI thinking and generating
-    setTimeout(() => {
-      const generatedLeadMessage = `Hi [Name],\n\nI noticed that [Company] has been doing some incredible work in the [Industry] space lately. \n\nI help companies like yours scale their operations by [Specific Value Prop based on context: "${capturedContext}"]. Recently, I helped a similar client achieve a 30% increase in efficiency within a month.\n\nI'd love to share how we could achieve similar results for [Company]. Are you open to a quick 10-minute chat next week?\n\nBest,\nShahid R.`;
-      
-      const aiMsg = { id: Date.now() + 1, role: 'system', content: generatedLeadMessage };
-      setMessages(prev => [...prev, aiMsg]);
+    try {
+      const response = await fetch(`${API_BASE}/api/ai/generate-lead`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ context: capturedContext })
+      });
+
+      if (response.status === 429) {
+        throw new Error('Too many requests. Please wait a minute and try again.');
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        const aiMsg = { id: Date.now() + 1, role: 'system', content: data.data };
+        setMessages(prev => [...prev, aiMsg]);
+      } else {
+        throw new Error(data.message || 'Failed to generate lead message.');
+      }
+    } catch (error) {
+      console.error('Error generating lead:', error);
+      const errorMsg = { 
+        id: Date.now() + 2, 
+        role: 'system', 
+        content: `❌ Error: ${error.message}` 
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   return (
