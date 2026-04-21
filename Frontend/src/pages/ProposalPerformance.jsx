@@ -71,17 +71,17 @@ const EditJobModal = ({ isOpen, onClose, job, onSave }) => {
     onSave(job._id, payload);
   };
 
-  const inputClass = "w-full bg-[#0f172a] text-white border border-[#334155] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors";
-  const labelClass = "block text-sm font-medium text-slate-400 mb-1.5";
+  const inputClass = "w-full bg-[#1c1917] text-white border border-[#44403c] rounded-lg px-4 py-2.5 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors";
+  const labelClass = "block text-sm font-medium text-stone-400 mb-1.5";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[#030712]/80 backdrop-blur-sm transition-opacity" onClick={onClose} />
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-[#1e293b] rounded-2xl shadow-2xl border border-[#334155] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="absolute inset-0 bg-[#0c0a09]/80 backdrop-blur-sm transition-opacity" onClick={onClose} />
+      <div className="relative w-full max-w-4xl max-h-[90vh] bg-[#292524] rounded-2xl shadow-2xl border border-[#44403c] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#334155] bg-[#0f172a]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#44403c] bg-[#1c1917]">
           <h2 className="text-xl font-bold text-white tracking-tight">Edit Proposal Details</h2>
-          <button onClick={onClose} className="p-2 -mr-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+          <button onClick={onClose} className="p-2 -mr-2 text-stone-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -145,14 +145,14 @@ const EditJobModal = ({ isOpen, onClose, job, onSave }) => {
                 <input type="number" step="0.1" min="0" max="5" name="clientStars" value={formData.clientStars} onChange={handleChange} className={inputClass} />
               </div>
 
-              <div className="md:col-span-2 flex items-center mt-2 p-4 bg-[#0f172a] rounded-xl border border-[#334155]">
+              <div className="md:col-span-2 flex items-center mt-2 p-4 bg-[#1c1917] rounded-xl border border-[#44403c]">
                 <input 
                   type="checkbox" 
                   id="editIsClientVerified" 
                   name="isClientVerified" 
                   checked={formData.isClientVerified} 
                   onChange={handleChange} 
-                  className="w-5 h-5 rounded border-[#334155] bg-[#1e293b] text-blue-500 focus:ring-blue-500/50"
+                  className="w-5 h-5 rounded border-[#44403c] bg-[#292524] text-amber-500 focus:ring-amber-500/50"
                 />
                 <label htmlFor="editIsClientVerified" className="ml-3 text-white font-medium cursor-pointer">
                   Client Payment is Verified
@@ -172,11 +172,11 @@ const EditJobModal = ({ isOpen, onClose, job, onSave }) => {
           </form>
         </div>
 
-        <div className="p-4 border-t border-[#334155] bg-[#0f172a] flex justify-end gap-3">
-          <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-colors">
+        <div className="p-4 border-t border-[#44403c] bg-[#1c1917] flex justify-end gap-3">
+          <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl font-medium text-stone-300 hover:text-white hover:bg-white/5 transition-colors">
             Cancel
           </button>
-          <button type="submit" form="edit-job-form" className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl font-medium transition-colors shadow-lg shadow-blue-500/20">
+          <button type="submit" form="edit-job-form" className="bg-amber-600 hover:bg-amber-500 text-white px-6 py-2.5 rounded-xl font-medium transition-colors shadow-lg shadow-amber-500/20">
             Save Changes
           </button>
         </div>
@@ -223,8 +223,8 @@ export default function ProposalPerformance() {
       case 'won': return 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]';
       case 'responded': return 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]';
       case 'viewed': return 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.6)]';
-      case 'submitted': return 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.6)]';
-      default: return 'bg-slate-500';
+      case 'submitted': return 'bg-amber-500 shadow-[0_0_10px_rgba(59,130,246,0.6)]';
+      default: return 'bg-stone-500';
     }
   };
 
@@ -251,11 +251,11 @@ export default function ProposalPerformance() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Proposal Performance</h1>
-          <p className="text-slate-400 mt-1">Track and manage your submitted proposals</p>
+          <p className="text-stone-400 mt-1">Track and manage your submitted proposals</p>
         </div>
         <button 
           onClick={() => setIsAddModalOpen(true)}
-          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)] active:scale-95 flex items-center gap-2"
+          className="bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-[0_0_20px_rgba(59,130,246,0.4)] active:scale-95 flex items-center gap-2"
         >
           <Zap className="w-4 h-4" />
           <span>Add Job</span>
@@ -263,7 +263,7 @@ export default function ProposalPerformance() {
       </div>
 
       <div className="glass-panel rounded-2xl flex-1 overflow-hidden flex flex-col border border-white/10">
-        <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-[#1e293b] bg-[#0f172a]/80 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+        <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-[#292524] bg-[#1c1917]/80 text-xs font-semibold text-stone-400 uppercase tracking-wider">
           <div className="col-span-2 text-center">Status</div>
           <div className="col-span-4">Job Title</div>
           <div className="col-span-2 text-center">Connects</div>
@@ -273,11 +273,11 @@ export default function ProposalPerformance() {
         
         <div className="flex-1 overflow-y-auto p-2 space-y-2">
           {isLoading ? (
-             <div className="flex flex-col items-center justify-center h-full text-slate-500">
+             <div className="flex flex-col items-center justify-center h-full text-stone-500">
                <p>Loading proposals...</p>
              </div>
           ) : jobs.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-slate-500">
+            <div className="flex flex-col items-center justify-center h-full text-stone-500">
               <p>No jobs added yet.</p>
             </div>
           ) : (
@@ -285,23 +285,23 @@ export default function ProposalPerformance() {
               <div 
                 key={job._id} 
                 onClick={() => setSelectedJob(job)}
-                className="grid grid-cols-12 gap-4 px-4 py-4 items-center rounded-xl hover:bg-[#1e293b]/60 cursor-pointer transition-colors border border-transparent hover:border-[#334155]/50 group relative"
+                className="grid grid-cols-12 gap-4 px-4 py-4 items-center rounded-xl hover:bg-[#292524]/60 cursor-pointer transition-colors border border-transparent hover:border-[#44403c]/50 group relative"
               >
                 <div className="col-span-2 flex justify-center">
                   <div className="relative group/tooltip">
                     <div className={cn("w-3.5 h-3.5 rounded-full transition-all duration-300", getStatusColor(job.status))} />
-                    <div className="absolute left-1/2 -top-8 -translate-x-1/2 bg-[#0f172a] text-xs text-white px-2 py-1 rounded border border-[#334155] opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                    <div className="absolute left-1/2 -top-8 -translate-x-1/2 bg-[#1c1917] text-xs text-white px-2 py-1 rounded border border-[#44403c] opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
                       {getStatusText(job.status)}
                     </div>
                   </div>
                 </div>
                 
-                <div className="col-span-4 font-medium text-slate-200 group-hover:text-white transition-colors">
+                <div className="col-span-4 font-medium text-stone-200 group-hover:text-white transition-colors">
                   {truncateTitle(job.title)}
                 </div>
                 
         <div className="col-span-2 flex justify-center">
-           <div className="bg-[#1e293b] px-3 py-1 rounded-full text-sm font-medium text-blue-400 border border-blue-500/20">
+           <div className="bg-[#292524] px-3 py-1 rounded-full text-sm font-medium text-amber-400 border border-amber-500/20">
              {job.connectsCost || 0}
            </div>
         </div>
@@ -320,7 +320,7 @@ export default function ProposalPerformance() {
                   )}
                 </div>
                 
-                <div className="col-span-2 text-right text-sm text-slate-400 flex items-center justify-end gap-3">
+                <div className="col-span-2 text-right text-sm text-stone-400 flex items-center justify-end gap-3">
                   <span className="flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5" />
                     {job.submissionDate ? new Date(job.submissionDate).toLocaleDateString() : 'N/A'}
@@ -331,7 +331,7 @@ export default function ProposalPerformance() {
                       e.stopPropagation(); 
                       setEditingJob(job);
                     }}
-                    className="p-1.5 hover:bg-[#334155] text-slate-400 hover:text-blue-400 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                    className="p-1.5 hover:bg-[#44403c] text-stone-400 hover:text-amber-400 rounded-md transition-colors opacity-0 group-hover:opacity-100"
                     title="Edit Proposal"
                   >
                     <Pencil className="w-4 h-4" />

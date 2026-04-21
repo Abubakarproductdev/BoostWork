@@ -113,10 +113,10 @@ export default function ProposalWriting() {
       <div className="flex items-center justify-between shrink-0">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
-            <Sparkles className="w-8 h-8 text-indigo-400" />
+            <Sparkles className="w-8 h-8 text-yellow-400" />
             AI Proposal Writer
           </h1>
-          <p className="text-slate-400 mt-1">Generate highly converting proposals instantly</p>
+          <p className="text-stone-400 mt-1">Generate highly converting proposals instantly</p>
         </div>
       </div>
 
@@ -129,16 +129,16 @@ export default function ProposalWriting() {
               <div className={cn(
                 "w-10 h-10 rounded-full flex items-center justify-center shrink-0 border",
                 msg.role === 'user' 
-                  ? "bg-blue-600/20 text-blue-400 border-blue-500/30" 
-                  : "bg-indigo-600/20 text-indigo-400 border-indigo-500/30"
+                  ? "bg-amber-600/20 text-amber-400 border-amber-500/30" 
+                  : "bg-yellow-600/20 text-yellow-400 border-yellow-500/30"
               )}>
                 {msg.role === 'user' ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
               </div>
               <div className={cn(
                 "p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap shadow-sm",
                 msg.role === 'user' 
-                  ? "bg-blue-600 text-white rounded-br-none" 
-                  : "bg-[#1e293b] text-slate-200 rounded-bl-none border border-[#334155]"
+                  ? "bg-amber-600 text-white rounded-br-none" 
+                  : "bg-[#292524] text-stone-200 rounded-bl-none border border-[#44403c]"
               )}>
                 {msg.title && <strong className="block text-white mb-2 text-base">{msg.title}</strong>}
                 {msg.content}
@@ -147,13 +147,13 @@ export default function ProposalWriting() {
           ))}
           {isTyping && (
             <div className="flex gap-4 max-w-[85%]">
-               <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border bg-indigo-600/20 text-indigo-400 border-indigo-500/30">
+               <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border bg-yellow-600/20 text-yellow-400 border-yellow-500/30">
                   <Bot className="w-5 h-5" />
                </div>
-               <div className="p-4 rounded-2xl bg-[#1e293b] rounded-bl-none border border-[#334155] flex gap-1.5 items-center">
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+               <div className="p-4 rounded-2xl bg-[#292524] rounded-bl-none border border-[#44403c] flex gap-1.5 items-center">
+                  <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce"></div>
                </div>
             </div>
           )}
@@ -161,7 +161,7 @@ export default function ProposalWriting() {
         </div>
 
         {/* Input Area */}
-        <div className="p-4 bg-[#0f172a] border-t border-[#334155]">
+        <div className="p-4 bg-[#1c1917] border-t border-[#44403c]">
           <form onSubmit={handleSend} className="max-w-4xl mx-auto space-y-3">
             <input 
               type="text" 
@@ -169,7 +169,7 @@ export default function ProposalWriting() {
               onChange={e => setInputTitle(e.target.value)}
               placeholder="Job Title (e.g. Need Senior React Developer)" 
               disabled={isTyping}
-              className="w-full bg-[#1e293b] text-white border border-[#334155] rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors disabled:opacity-50"
+              className="w-full bg-[#292524] text-white border border-[#44403c] rounded-xl px-4 py-2.5 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-colors disabled:opacity-50"
             />
             <div className="relative">
               <textarea 
@@ -178,12 +178,12 @@ export default function ProposalWriting() {
                 placeholder="Paste the full job description here..." 
                 rows={3}
                 disabled={isTyping}
-                className="w-full bg-[#1e293b] text-white border border-[#334155] rounded-xl pl-4 pr-14 pt-3 pb-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors resize-none disabled:opacity-50"
+                className="w-full bg-[#292524] text-white border border-[#44403c] rounded-xl pl-4 pr-14 pt-3 pb-3 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-colors resize-none disabled:opacity-50"
               />
               <button 
                 type="submit" 
                 disabled={isTyping || !inputTitle.trim() || !inputDescription.trim()}
-                className="absolute right-3 bottom-3 p-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 text-white rounded-lg transition-colors shadow-lg active:scale-95"
+                className="absolute right-3 bottom-3 p-2 bg-yellow-600 hover:bg-yellow-500 disabled:bg-stone-700 text-white rounded-lg transition-colors shadow-lg active:scale-95"
               >
                 <Send className="w-4 h-4" />
               </button>

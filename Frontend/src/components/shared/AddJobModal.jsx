@@ -96,17 +96,17 @@ export default function AddJobModal({ isOpen, onClose, onCreated }) {
     }));
   };
 
-  const inputClass = "w-full bg-[#0f172a] text-white border border-[#334155] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder:text-slate-500";
-  const labelClass = "block text-sm font-medium text-slate-400 mb-1.5";
+  const inputClass = "w-full bg-[#1c1917] text-white border border-[#44403c] rounded-lg px-4 py-2.5 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors placeholder:text-stone-500";
+  const labelClass = "block text-sm font-medium text-stone-400 mb-1.5";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[#030712]/80 backdrop-blur-sm transition-opacity" onClick={onClose} />
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-[#1e293b] rounded-2xl shadow-2xl border border-[#334155] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="absolute inset-0 bg-[#0c0a09]/80 backdrop-blur-sm transition-opacity" onClick={onClose} />
+      <div className="relative w-full max-w-4xl max-h-[90vh] bg-[#292524] rounded-2xl shadow-2xl border border-[#44403c] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#334155] bg-[#0f172a]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#44403c] bg-[#1c1917]">
           <h2 className="text-xl font-bold text-white tracking-tight">Add New Job Application</h2>
-          <button onClick={onClose} disabled={isSubmitting} className="p-2 -mr-2 text-slate-400 hover:text-white rounded-lg transition-colors">
+          <button onClick={onClose} disabled={isSubmitting} className="p-2 -mr-2 text-stone-400 hover:text-white rounded-lg transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -170,8 +170,8 @@ export default function AddJobModal({ isOpen, onClose, onCreated }) {
                 <input type="number" step="0.1" min="0" max="5" name="clientStars" value={formData.clientStars} onChange={handleChange} className={inputClass} />
               </div>
 
-              <div className="md:col-span-2 flex items-center mt-2 p-4 bg-[#0f172a] rounded-xl border border-[#334155]">
-                <input type="checkbox" id="isClientVerified" name="isClientVerified" checked={formData.isClientVerified} onChange={handleChange} className="w-5 h-5 rounded border-[#334155] bg-[#1e293b] text-blue-500 focus:ring-blue-500/50" />
+              <div className="md:col-span-2 flex items-center mt-2 p-4 bg-[#1c1917] rounded-xl border border-[#44403c]">
+                <input type="checkbox" id="isClientVerified" name="isClientVerified" checked={formData.isClientVerified} onChange={handleChange} className="w-5 h-5 rounded border-[#44403c] bg-[#292524] text-amber-500 focus:ring-amber-500/50" />
                 <label htmlFor="isClientVerified" className="ml-3 text-white font-medium cursor-pointer">Client Payment is Verified</label>
               </div>
 
@@ -188,9 +188,9 @@ export default function AddJobModal({ isOpen, onClose, onCreated }) {
           </form>
         </div>
 
-        <div className="p-4 border-t border-[#334155] bg-[#0f172a] flex justify-end gap-3">
-          <button type="button" onClick={onClose} disabled={isSubmitting} className="px-5 py-2.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-colors">Cancel</button>
-          <button type="submit" form="add-job-form" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl font-medium transition-colors shadow-lg shadow-blue-500/20">{isSubmitting ? 'Saving...' : 'Add Job'}</button>
+        <div className="p-4 border-t border-[#44403c] bg-[#1c1917] flex justify-end gap-3">
+          <button type="button" onClick={onClose} disabled={isSubmitting} className="px-5 py-2.5 rounded-xl font-medium text-stone-300 hover:text-white hover:bg-white/5 transition-colors">Cancel</button>
+          <button type="submit" form="add-job-form" disabled={isSubmitting} className="bg-amber-600 hover:bg-amber-500 text-white px-6 py-2.5 rounded-xl font-medium transition-colors shadow-lg shadow-amber-500/20">{isSubmitting ? 'Saving...' : 'Add Job'}</button>
         </div>
       </div>
     </div>

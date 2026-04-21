@@ -98,26 +98,26 @@ export default function CustomizeDetails() {
     }
   };
 
-  const inputClass = "w-full bg-[#0f172a] text-white border border-[#334155] rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder:text-slate-500";
-  const labelClass = "block text-sm font-medium text-slate-400 mb-1.5";
+  const inputClass = "w-full bg-[#1c1917] text-white border border-[#44403c] rounded-lg px-4 py-2.5 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors placeholder:text-stone-500";
+  const labelClass = "block text-sm font-medium text-stone-400 mb-1.5";
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-slate-400 animate-pulse">Loading portfolio context...</p>
+        <p className="text-stone-400 animate-pulse">Loading portfolio context...</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6 pb-12 h-full overflow-y-auto pr-2 custom-scrollbar">
-      <div className="flex items-center justify-between sticky top-0 bg-[#0a0f1c]/90 backdrop-blur-md z-10 py-4 -my-4 border-b border-[#1e293b] mb-4">
+      <div className="flex items-center justify-between sticky top-0 bg-[#0a0f1c]/90 backdrop-blur-md z-10 py-4 -my-4 border-b border-[#292524] mb-4">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
             <UserCircle className="w-8 h-8 text-amber-500" />
             Customize My Details
           </h1>
-          <p className="text-slate-400 mt-1">Information used as context by the AI Proposal Writer</p>
+          <p className="text-stone-400 mt-1">Information used as context by the AI Proposal Writer</p>
         </div>
         <button 
           onClick={handleSave}
@@ -133,7 +133,7 @@ export default function CustomizeDetails() {
         {/* Core Details */}
         <div className="xl:col-span-1 space-y-6">
           <div className="glass-panel p-6 rounded-2xl border border-white/5 space-y-4">
-            <h2 className="text-xl font-bold text-white pb-3 border-b border-[#334155]">Core Identity</h2>
+            <h2 className="text-xl font-bold text-white pb-3 border-b border-[#44403c]">Core Identity</h2>
             
             <div>
               <label className={labelClass}>Full Name</label>
@@ -171,14 +171,14 @@ export default function CustomizeDetails() {
         <div className="xl:col-span-2 space-y-6">
           
           <div className="glass-panel p-6 rounded-2xl border border-white/5 space-y-4">
-             <div className="flex items-center justify-between pb-3 border-b border-[#334155]">
+             <div className="flex items-center justify-between pb-3 border-b border-[#44403c]">
                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                 <FolderKanban className="w-5 h-5 text-indigo-400" />
+                 <FolderKanban className="w-5 h-5 text-yellow-400" />
                  Projects Context
                </h2>
                <button 
                   onClick={() => setProjects([...projects, { id: Date.now(), title: '', description: '', tech: '', link: '' }])}
-                  className="text-sm font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1 bg-indigo-500/10 px-3 py-1.5 rounded-lg"
+                  className="text-sm font-medium text-yellow-400 hover:text-indigo-300 flex items-center gap-1 bg-yellow-500/10 px-3 py-1.5 rounded-lg"
                >
                  <Plus className="w-4 h-4" /> Add Project
                </button>
@@ -186,10 +186,10 @@ export default function CustomizeDetails() {
 
              <div className="space-y-4">
                 {projects.map((proj, idx) => (
-                  <div key={proj.id} className="bg-[#0f172a] border border-[#334155] rounded-xl p-4 relative group">
+                  <div key={proj.id} className="bg-[#1c1917] border border-[#44403c] rounded-xl p-4 relative group">
                     <button 
                       onClick={() => setProjects(projects.filter(p => p.id !== proj.id))}
-                      className="absolute top-4 right-4 text-slate-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 z-10"
+                      className="absolute top-4 right-4 text-stone-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 z-10"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -239,14 +239,14 @@ export default function CustomizeDetails() {
           </div>
 
           <div className="glass-panel p-6 rounded-2xl border border-white/5 space-y-4">
-             <div className="flex items-center justify-between pb-3 border-b border-[#334155]">
+             <div className="flex items-center justify-between pb-3 border-b border-[#44403c]">
                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                 <LinkIcon className="w-5 h-5 text-blue-400" />
+                 <LinkIcon className="w-5 h-5 text-amber-400" />
                  Portfolio & Social Links
                </h2>
                <button 
                   onClick={() => setLinks([...links, { id: Date.now(), name: '', url: '' }])}
-                  className="text-sm font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1 bg-blue-500/10 px-3 py-1.5 rounded-lg"
+                  className="text-sm font-medium text-amber-400 hover:text-blue-300 flex items-center gap-1 bg-amber-500/10 px-3 py-1.5 rounded-lg"
                >
                  <Plus className="w-4 h-4" /> Add Link
                </button>
@@ -254,10 +254,10 @@ export default function CustomizeDetails() {
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {links.map((link, idx) => (
-                  <div key={link.id} className="bg-[#0f172a] border border-[#334155] rounded-xl p-4 flex gap-3 relative group">
+                  <div key={link.id} className="bg-[#1c1917] border border-[#44403c] rounded-xl p-4 flex gap-3 relative group">
                     <button 
                       onClick={() => setLinks(links.filter(l => l.id !== link.id))}
-                      className="absolute top-2 right-2 text-slate-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                      className="absolute top-2 right-2 text-stone-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
